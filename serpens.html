@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+<meta charset="UTF-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<title>serpens</title>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-51903062-1', 'ghosthack.com');
+  ga('send', 'pageview');
+
+</script>
+
+<script type="text/javascript">
+console.log("Welcome!");
+
+var api = {
+  level: 1,
+  score: 0,
+  delay: 400,
+  size: 20,
+  timeout: null,
+  context: null,
+  base: 41,
+  height: 41,
+  space: [],
+  // the serpent is a list of direction functions, with a head, and a length
+  position: [20,20],
+  list: [], //list of functions
+  current: null,
+  length: 0,
+  paused: false,
+  over: false
+};
+
+api.leftPoint = function(p) { return [p[0]-1,p[1]] }
+
+api.rightPoint = function(p) { return [p[0]+1,p[1]] }
+
+api.downPoint = function(p) { return [p[0],p[1]+1] }
+
+api.upPoint = function(p) { return [p[0],p[1]-1] }
+
+api.leftList = api.rightPoint;
+
+api.rightList = api.leftPoint;
+
+api.downList = api.upPoint;
+
+api.upList = api.downPoint;
+
+api.initialize = function() {
+  for(var i=0; i<api.base; i++) {
+    api.space[i] = [];
+    for(var j=0; j<api.height; j++) {
+      api.space[i][j] = null;
+    }
+  }
+  api.current = api.rightPoint;
+  api.loop();
+}
+
+api.clear = function() {
+  api.context.clearRect(0,0, api.base*api.size, api.height*api.size);
+}
+
+api.draw = function() {
+  api.context.fillStyle = "silver";
+  api.context.fillRect(api.position[0]*api.size, api.position[1]*api.size, api.size, api.size);
+}
+
+api.render = function() {
+  api.clear();
+  api.draw();
+}
+
+api.tick = function() {
+  api.position = api.current(api.position);
+  api.render();
+}
+
+api.left = function() {
+  api.render();
+};
+
+api.right = function() {
+  api.render();
+}
+
+api.up = function() {
+  api.render();
+}
+
+api.down = function() {
+  api.render();
+}
+
+api.loop = function() {
+  api.tick();
+  if(!api.over && !api.paused) {
+    api.scheduleLoop();
+  }
+}
+
+api.scheduleLoop = function() {
+  api.timeout = window.setTimeout(api.loop, api.delay);
+}
+
+api.clearTimeout = function() {
+  if(api.timeout != null) {
+    window.clearTimeout(api.timeout);
+    api.timeout = null;
+  }
+}
+
+api.pause = function() {
+  api.paused = true;
+  api.clearTimeout();
+}
+
+api.resume = function() {
+  api.paused = false;
+  api.scheduleLoop();
+}
+
+api.pauseOrResume = function() {
+  if(!api.paused) {
+    api.pause();
+  } else {
+    api.resume();
+  }
+}
+
+function main() {
+  var canvas = document.getElementById("canvas2d");
+  var context = canvas.getContext("2d");
+
+  var w = window.innerWidth-10;
+  var h = window.innerHeight-10;
+  var base = api.base;
+  var s1 = Math.floor(w/base);
+  var s2 = Math.floor(h/api.height);
+  api.size = Math.min(s1, s2);
+  canvas.width = base * api.size;
+  canvas.height = api.height * api.size;
+  api.context = context;
+  api.initialize();
+}
+
+function keyAction() {
+  switch(event.keyCode) {
+    case 81: // q
+      break;
+    case 80:
+      api.pauseOrResume();
+      break;
+    case 37:
+      api.left();
+      break;
+    case 39:
+      api.right();
+      break;
+    case 40:
+      api.down();
+      break;
+    case 38:
+      api.up();
+      break;
+    default: console.log(event.keyCode);
+  }
+}
+
+</script>
+</head>
+<body id="body2d" onload="main()" onkeydown="keyAction()" style="padding: 0; margin: 0; background: silver">
+<div id="div2d" style="position:absolute; top:0; left:0;"></div>
+<canvas id="canvas2d" width="1" height="1" style="border: 0; padding: 0; margin: auto; display: block; background-color: white;">
+</canvas>
+</body>
+</html>
